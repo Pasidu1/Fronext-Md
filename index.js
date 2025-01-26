@@ -18,8 +18,6 @@ import chalk from 'chalk';
 import moment from 'moment-timezone';
 import axios from 'axios';
 import config from './config.js';
-import pkg from './lib/autoreact.cjs';
-const { emojis, doReact } = pkg;
 
 const sessionName = "session";
 const app = express();
