@@ -1,174 +1,227 @@
-import dotenv from 'dotenv';
-dotenv.config();
+const {
+default: makeWASocket,
+useMultiFileAuthState,
+DisconnectReason,
+jidNormalizedUser,
+getContentType,
+fetchLatestBaileysVersion,
+Browsers
+} = require('@whiskeysockets/baileys')
 
-import {
-    makeWASocket,
-    Browsers,
-    fetchLatestBaileysVersion,
-    DisconnectReason,
-    useMultiFileAuthState,
-} from '@whiskeysockets/baileys';
-import { Handler, Callupdate, GroupUpdate } from './src/event/index.js';
-import express from 'express';
-import pino from 'pino';
-import fs from 'fs';
-import NodeCache from 'node-cache';
-import path from 'path';
-import chalk from 'chalk';
-import moment from 'moment-timezone';
-import axios from 'axios';
-import config from './config.js';
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
+const fs = require('fs')
+const l = console.log
+const P = require('pino')
+const config = require('./config')
+const qrcode = require('qrcode-terminal')
+const util = require('util')
+const { sms,downloadMediaMessage } = require('./lib/msg')
+const axios = require('axios')
+const { File } = require('megajs')
 
-const sessionName = "session";
+const ownerNumber = ['94743491027']
+
+//===================SESSION-AUTH============================
+if (!fs.existsSync(__dirname + '/session/creds.json')) {
+if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
+const sessdata = config.SESSION_ID
+const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
+filer.download((err, data) => {
+if(err) throw err
+fs.writeFile(__dirname + '/session/creds.json', data, () => {
+console.log("Session downloaded ✅")
+})})}
+
+const express = require("express");
 const app = express();
-const orange = chalk.bold.hex("#FFA500");
-const lime = chalk.bold.hex("#32CD32");
-let useQR = false;
-let initialConnection = true;
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
-const MAIN_LOGGER = pino({
-    timestamp: () => `,"time":"${new Date().toJSON()}"`
+//=============================================
+
+async function connectToWA() {
+console.log("Connecting wa bot 📀...");
+const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/')
+var { version } = await fetchLatestBaileysVersion()
+
+const conn = makeWASocket({
+        logger: P({ level: 'silent' }),
+        printQRInTerminal: false,
+        browser: Browsers.macOS("Firefox"),
+        syncFullHistory: true,
+        auth: state,
+        version
+        })
+    
+conn.ev.on('connection.update', (update) => {
+const { connection, lastDisconnect } = update
+if (connection === 'close') {
+if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
+connectToWA()
+}
+} else if (connection === 'open') {
+console.log('FRONEXT-MD CONNECTED TO WHATSAPP✅\n@NADEEN POORNA')
+const path = require('path');
+fs.readdirSync("./plugins/").forEach((plugin) => {
+if (path.extname(plugin).toLowerCase() == ".js") {
+require("./plugins/" + plugin);
+}
 });
-const logger = MAIN_LOGGER.child({});
-logger.level = "trace";
+console.log('Plugins installed successful ✅')
+console.log('Bot connected to whatsapp ✅')
 
-const msgRetryCounterCache = new NodeCache();
+let up = `🚀 *_NADEEN-MD Connected Successfully!_* ✅ 
+*💥 PREFIX:* ${prefix}
+*💥 OWNER:* ${ownerNumber}
+*💥 MADE BY:* Nadeen Poorna `;
 
-const __filename = new URL(import.meta.url).pathname;
-const __dirname = path.dirname(__filename);
+conn.sendMessage(ownerNumber + "@s.whatsapp.net", { image: { url: `https://files.catbox.moe/7exz93.png` }, caption: up })
 
-const sessionDir = path.join(__dirname, 'session');
-const credsPath = path.join(sessionDir, 'creds.json');
+}
+})
+conn.ev.on('creds.update', saveCreds)  
 
-if (!fs.existsSync(sessionDir)) {
-    fs.mkdirSync(sessionDir, { recursive: true });
+conn.ev.on('messages.upsert', async(mek) => {
+mek = mek.messages[0]
+if (!mek.message) return	
+mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
+if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_READ_STATUS === "true"){
+await conn.readMessages([mek.key])
+}
+//=========autobio=======//
+if (config.AUTO_BIO === 'true'){
+               await
+conn.updateProfileStatus(`💀𝗡𝗔𝗗𝗘𝗘𝗡-𝗠𝗗 🌠𝗦𝘂𝗰𝗰𝗲𝘀𝗳𝘂𝗹𝗹𝘆 𝗖𝗼𝗻𝗻𝗲𝗰𝘁𝗲𝗱➤ 𝗧𝗵𝗶𝘀 𝗗𝗲𝘃𝗶𝗰𝗲 𝗜𝘁 𝗛𝗮𝘃𝗲 𝗕𝗲𝗲𝗻 𝗥𝘂𝗻𝗻𝗶𝗻𝗴 𝗙𝗼𝗿 ⚡💻`)
+}
+const m = sms(conn, mek)
+const type = getContentType(mek.message)
+const content = JSON.stringify(mek.message)
+const from = mek.key.remoteJid
+const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
+const body = (type === 'conversation') ? mek.message.conversation : (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text : (type == 'imageMessage') && mek.message.imageMessage.caption ? mek.message.imageMessage.caption : (type == 'videoMessage') && mek.message.videoMessage.caption ? mek.message.videoMessage.caption : ''
+const isCmd = body.startsWith(prefix)
+const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : ''
+const args = body.trim().split(/ +/).slice(1)
+const q = args.join(' ')
+const isGroup = from.endsWith('@g.us')
+const sender = mek.key.fromMe ? (conn.user.id.split(':')[0]+'@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJid)
+const senderNumber = sender.split('@')[0]
+const botNumber = conn.user.id.split(':')[0]
+const pushname = mek.pushName || 'Sin Nombre'
+const isMe = botNumber.includes(senderNumber)
+const isOwner = ownerNumber.includes(senderNumber) || isMe
+const botNumber2 = await jidNormalizedUser(conn.user.id);
+const groupMetadata = isGroup ? await conn.groupMetadata(from).catch(e => {}) : ''
+const groupName = isGroup ? groupMetadata.subject : ''
+const participants = isGroup ? await groupMetadata.participants : ''
+const groupAdmins = isGroup ? await getGroupAdmins(participants) : ''
+const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
+const isAdmins = isGroup ? groupAdmins.includes(sender) : false
+const isReact = m.message.reactionMessage ? true : false
+const reply = (teks) => {
+conn.sendMessage(from, { text: teks }, { quoted: mek })
 }
 
-async function downloadSessionData() {
-    if (!config.SESSION_ID) {
-        console.error('Please add your session to SESSION_ID env !!');
-        return false;
-    }
-    const sessdata = config.SESSION_ID.split("𝙰𝚂𝙸𝚃𝙷𝙰-𝙼𝙳=")[1];
-    const url = `https://pastebin.com/raw/${sessdata}`;
-    try {
-        const response = await axios.get(url);
-        const data = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        await fs.promises.writeFile(credsPath, data);
-        console.log("🔒 Session Successfully Loaded !!");
-        return true;
-    } catch (error) {
-        console.error('Failed to download session data:', error);
-        return false;
-    }
-}
-
-async function start() {
-    try {
-        const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
-        const { version, isLatest } = await fetchLatestBaileysVersion();
-        console.log(`🤖 Fronext-MD using WA v${version.join('.')}, isLatest: ${isLatest}`);
-        
-        const Matrix = makeWASocket({
-            version,
-            logger: pino({ level: 'silent' }),
-            printQRInTerminal: useQR,
-            browser: ["Fronext-MD", "safari", "3.3"],
-            auth: state,
-            getMessage: async (key) => {
-                if (store) {
-                    const msg = await store.loadMessage(key.remoteJid, key.id);
-                    return msg.message || undefined;
-                }
-                return { conversation: "Fronext-MD WhatsApp User Bot" };
-            }
-        });
-
-        Matrix.ev.on('connection.update', (update) => {
-            const { connection, lastDisconnect } = update;
-            if (connection === 'close') {
-                if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-                    start();
-                }
-            } else if (connection === 'open') {
-                if (initialConnection) {
-                    console.log(chalk.green("*😃 Fronext-MD is connected successfully to whatsapp ✅*\n\n_Also Follow my wa channel 🤗_\n\n• Link : </>"));
-                    Matrix.sendMessage(Matrix.user.id, { text: `*😃 Fronext-MD is connected successfully to whatsapp ✅*\n\n_Also Follow my wa channel 🤗_\n\n• Link : </>` });
-                    initialConnection = false;
-                } else {
-                    console.log(chalk.blue("♻️ Connection reestablished after restart."));
-                }
-            }
-        });
-
-        Matrix.ev.on('creds.update', saveCreds);
-
-        // Handle message events
-        Matrix.ev.on("messages.upsert", async (chatUpdate) => {
-            try {
-                const mek = chatUpdate.messages[0];
-                const fromJid = mek.key.participant || mek.key.remoteJid;
-                if (!mek || !mek.message || mek.key.fromMe) return;
-                if (mek.message?.protocolMessage || mek.message?.ephemeralMessage || mek.message?.reactionMessage) return;
-
-                // Handle auto-reaction
-                if (config.AUTO_REACT) {
-                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                    await doReact(randomEmoji, mek, Matrix);
-                }
-
-                // Handle auto-status seen and reply
-                if (mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN) {
-                    await Matrix.readMessages([mek.key]);
-                    if (config.AUTO_STATUS_REPLY) {
-                        const customMessage = config.STATUS_READ_MSG || '✅ Auto Status Seen Bot By Fronext-MD';
-                        await Matrix.sendMessage(fromJid, { text: customMessage }, { quoted: mek });
+conn.edit = async (mek, newmg) => {
+                await conn.relayMessage(from, {
+                    protocolMessage: {
+                        key: mek.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: newmg
+                        }
                     }
-                }
-            } catch (err) {
-                console.error('Error handling messages.upsert event:', err);
+                }, {})
+}
+conn.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
+              let mime = '';
+              let res = await axios.head(url)
+              mime = res.headers['content-type']
+              if (mime.split("/")[1] === "gif") {
+                return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, gifPlayback: true, ...options }, { quoted: quoted, ...options })
+              }
+              let type = mime.split("/")[0] + "Message"
+              if (mime === "application/pdf") {
+                return conn.sendMessage(jid, { document: await getBuffer(url), mimetype: 'application/pdf', caption: caption, ...options }, { quoted: quoted, ...options })
+              }
+              if (mime.split("/")[0] === "image") {
+                return conn.sendMessage(jid, { image: await getBuffer(url), caption: caption, ...options }, { quoted: quoted, ...options })
+              }
+              if (mime.split("/")[0] === "video") {
+                return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, mimetype: 'video/mp4', ...options }, { quoted: quoted, ...options })
+              }
+              if (mime.split("/")[0] === "audio") {
+                return conn.sendMessage(jid, { audio: await getBuffer(url), caption: caption, mimetype: 'audio/mpeg', ...options }, { quoted: quoted, ...options })
+              }
             }
-        });
-
-        Matrix.ev.on("call", async (json) => await Callupdate(json, Matrix));
-        Matrix.ev.on("group-participants.update", async (messag) => await GroupUpdate(Matrix, messag));
-
-        if (config.MODE === "public") {
-            Matrix.public = true;
-        } else if (config.MODE === "private") {
-            Matrix.public = false;
-        }
-
-    } catch (error) {
-        console.error('Critical Error:', error);
-        process.exit(1);
-    }
+            
+//========OwnerReact========            
+         
+if(senderNumber.includes("94711451319")){
+if(isReact) return
+m.react("👨‍💻")
 }
-
-async function init() {
-    if (fs.existsSync(credsPath)) {
-        console.log("🔒 Session file found, proceeding without QR code.");
-        await start();
-    } else {
-        const sessionDownloaded = await downloadSessionData();
-        if (sessionDownloaded) {
-            console.log("🔒 Session downloaded, starting bot.");
-            await start();
-        } else {
-            console.log("No session found or downloaded, QR code will be printed for authentication.");
-            useQR = true;
-            await start();
-        }
-    }
+if(senderNumber.includes("94779483535")){
+if(isReact) return
+m.react("💀")
 }
+if(senderNumber.includes("94716769285")){
+if(isReact) return
+m.react("👨🏻‍💻")
+}
+//=====Auto-Read-Cmd==========
+if (isCmd && config.AUTO_READ_CMD === "true") {
+              await conn.readMessages([mek.key])  // Mark command as read
+}
+//Auto Typing
+if(config.AUTO_TYPING === 'true'){await conn.sendPresenceUpdate('composing', from);}
+        
+//Auto-StatusDL============== 
+        
+//=====================✓
+if (config.AUTO_VOICE === 'true') {
+const url = 'https://raw.githubusercontent.com/Nadeenpoorna-max/NADEENMD_DATABASED/main/autovoice/NADEEN-DATA'
+let { data } = await axios.get(url)
+for (vr in data){
+if((new RegExp(`\\b${vr}\\b`,'gi')).test(body)) conn.sendMessage(from,{audio: { url : data[vr]},mimetype: 'audio/mpeg',ptt:true},{quoted:mek})   
+ }}
+        
+const events = require('./command')
+const cmdName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : false;
+if (isCmd) {
+const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName))
+if (cmd) {
+if (cmd.react) conn.sendMessage(from, { react: { text: cmd.react, key: mek.key }})
 
-init();
+try {
+cmd.function(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply});
+} catch (e) {
+console.error("[PLUGIN ERROR] " + e);
+}
+}
+}
+events.commands.map(async(command) => {
+if (body && command.on === "body") {
+command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+} else if (mek.q && command.on === "text") {
+command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+} else if (
+(command.on === "image" || command.on === "photo") &&
+mek.type === "imageMessage"
+) {
+command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+} else if (
+command.on === "sticker" &&
+mek.type === "stickerMessage"
+) {
+command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+}});
 
-app.get('/', (req, res) => {
-    res.send('📟 Hello, Fronext-MD is successfully working ‼️');
+})
+}
+app.get("/", (req, res) => {
+res.send("hey, bot started✅");
 });
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
+setTimeout(() => {
+connectToWA()
+}, 4000);  
