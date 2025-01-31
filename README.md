@@ -200,7 +200,7 @@ PREFIX=.
 <h2 align="center"> ✧ Join My Whatsapp Chanel For Support ✧
 </h2>
 
-<h2 align="center">  <a href="https://whatsapp.com/channel/0029VaqPVqA1yT2CTlHi0o13"><img src="https://img.shields.io/badge/Join Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
+<h2 align="center">  <a href="https://whatsapp.com/channel/0029VaqPVqA1yT2CTlHi0o13"><img src="https://img.shields.io/badge/Join Chanel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
 </a>
 
 </h2>
