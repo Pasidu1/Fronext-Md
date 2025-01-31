@@ -34,19 +34,19 @@
    
 
    <p align="center"> 
-  <a href="https://github.com/rcd-git-hub-official/RCD-MD">
-    <img src="https://img.shields.io/github/stars/rcd-git-hub-official/RCD-MD?style=social">
+  <a href="https://github.com/Pasidu1/Fronext-Md">
+    <img src="https://img.shields.io/github/stars/Pasidu1/Fronext-Md">
     
    <p align="center">
-  <a href="https://github.com/rcd-git-hub-official/RCD-MD/fork">
-    <img src="https://img.shields.io/github/forks/rcd-git-hub-official/RCD-MD?label=Fork&style=social">
+  <a href="https://github.com/Pasidu1/Fronext-Md/fork">
+    <img src="https://img.shields.io/github/forks/Pasidu1/Fronext-Md?label=Fork&style=social">
     
 <p align="center">
   <a href="https://github.com/Pasidu1/Fronext-Md">
     <img src="https://api.visitorbadge.io/api/visitors?path=rcd-git-hub-official%2FA17&label=Repo%20Visitors&labelColor=%23697689&countColor=%23ba68c8&style=plastic&labelStyle=upper">
  
   <p align="CENTER">
-  <a href="https://github.com/rcd-git-hub-official"><img title="Support" src="https://img.shields.io/badge/Maintain-Yes-cyan.svg?style=for-the-badge&logo=xcode" /></a>
+  <a href="https://github.com/Pasidu1/Fronext-Md"><img title="Support" src="https://img.shields.io/badge/Maintain-Yes-cyan.svg?style=for-the-badge&logo=xcode" /></a>
 </p>
     
 <br>
@@ -60,7 +60,7 @@
      
   
 <p align="CENTER">
-  <a href="https://github.com/rcd-git-hub-official"><img title="Support" src="https://img.shields.io/badge/next%20Update-Undefined!-green.svg?style=for-the-badge&logo=xcode" /></a>
+  <a href="https://github.com/Pasidu1/Fronext-Md"><img title="Support" src="https://img.shields.io/badge/next%20Update-Undefined!-green.svg?style=for-the-badge&logo=xcode" /></a>
 </p>
      
 
@@ -73,7 +73,7 @@
 </h2>
    
 
-<h2 align="center">  <a href="https://github.com/rcd-git-hub-official/RCD-MD?fork"><img src="https://img.shields.io/badge/FORK RCD MD V2-h?color=white&style=for-the-badge&logo=stackshare" />
+<h2 align="center">  <a href="https://github.com/Pasidu1/Fronext-Md/fork"><img src="https://img.shields.io/badge/FORK FRONEXT MD V1-h?color=white&style=for-the-badge&logo=stackshare" />
 </a>
 </h2>
  
@@ -91,15 +91,15 @@
   </br>
      
 
-## PAIR WITH WHATSAPP  1
+## PAIR WITH WHATSAPP  
 <h2 align="left">  <a href="https://david-session-production.up.railway.app/pair"><img src="https://play-lh.googleusercontent.com/901aMQFFnVoX2T-YuJmTIwpPve_SUgMv_QSyzMSPtAqt_l0CyXN1DxfD6xXU0r2f9iM=w240-h480-rw" width="90" />
 </a>
 </h2>
 
-## PAIR WITH WHATSAPP 2
+## QR WITH WHATSAPP 2
 
 
-<h2 align="left">  <a href="https://david-session-production.up.railway.app/pair"><img src="https://play-lh.googleusercontent.com/901aMQFFnVoX2T-YuJmTIwpPve_SUgMv_QSyzMSPtAqt_l0CyXN1DxfD6xXU0r2f9iM=w240-h480-rw" width="90" />
+<h2 align="left">  <a href="https://david-session-production.up.railway.app/wasiqr"><img src="https://play-lh.googleusercontent.com/901aMQFFnVoX2T-YuJmTIwpPve_SUgMv_QSyzMSPtAqt_l0CyXN1DxfD6xXU0r2f9iM=w240-h480-rw" width="90" />
 </a>
 </h2>
 
@@ -148,7 +148,7 @@
   </br>
 
 
-⭕  DEPLOY ON [ Heroko ]
+⭕  DEPLOY ON [ Railway ]
 
 [![Find On Whatsapp ](https://img.shields.io/badge/🚘Click_Here-blue.svg)](https://render.com)
 
