@@ -10,7 +10,7 @@
 
 <p align="center">
    <a href="https://github.com/rcd-git-hub-official">
-    <img src="https://i.ibb.co/T9PBtQt/2631.jpg" width="249">
+    <img src="https://i.ibb.co/T9PBtQt/2631.jpg" width="700px">
 
 
    <a><img src='https://i.imgur.com/LyHic3i.gif'/></a><a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
