@@ -11,7 +11,7 @@ cmd({
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
 try{
 const voice = {
-    menu: 'media/AUD-20250202-WA0096.mp4a'
+    menu: 'session/MENUVOICEBYNADEEN.mp3'
         }
 let dec = `*👋 Hello ${pushname}*
 
