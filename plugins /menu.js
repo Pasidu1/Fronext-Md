@@ -97,7 +97,7 @@ let dec = `*👋 Hello ${pushname}*
 *©𝙵𝚁𝙾𝙽𝙴𝚇𝚃 𝙼𝙳 𝙱𝚈 𝙲𝚈𝙱𝙴𝚁 𝙵𝚁𝙾𝙻𝚈ッ*`
 await conn.sendMessage(from, { audio: { url: voice.menu }, mimetype: 'audio/mp4', ptt: true }, { quoted: mek })
 
-await conn.sendMessage(from,{image:{url: `https://i.ibb.co/2cbqdZ1/6360.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://i.ibb.co/S4bD7TkQ/8065.jpg`},caption:dec},{quoted:mek});
 
 }catch(e){
 console.log(e)
